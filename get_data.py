@@ -51,4 +51,22 @@ for cat, cat_id in cat_ids.items():
     time.sleep(np.random.uniform(1, 3))
 total_artist_ids = pd.concat(total_artist_ids, axis=0, ignore_index=True)
 total_artist_ids.to_csv("./data/artist_ids.csv", index=False)
-print("artist id done")
+print("artist id done\n")
+
+
+# 依据歌手id从歌手详情页获取歌手歌曲信息和歌手详情
+total_songs = []
+artist_details = []
+print(f"starting get artist detail...")
+for artist_id in total_artist_ids.loc[:, "id"]:
+    artist_detail, songs_urls = crawler.get_artist_detail(
+        id=artist_id, headers=base_headers, cookies=cookies
+    )
+    total_songs.append(songs_urls)
+    artist_details.append(artist_detail)
+    print(f"id:{artist_id} done")
+total_songs = pd.concat(total_songs)
+artist_details = pd.DataFrame(artist_details)
+artist_details.to_csv("artist_details.csv", index=False)
+total_songs.to_csv("songs_urls.csv", index=False)
+print("artist detail done\n")
