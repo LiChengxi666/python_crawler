@@ -31,7 +31,7 @@ def parse_cookies(cookie_str: str):
 # 获取歌手id
 def get_artist_id(url, headers=None, cookies=None):
     """
-    爬取对应页面下的歌手id，歌手名称等基本信息，并依据爬取的信息构造并存储歌手详情页的url
+    爬取对应页面下的歌手id，歌手名称等基本信息
     """
     if headers is None:
         headers = {"User-Agent": UserAgent().random}
@@ -40,25 +40,27 @@ def get_artist_id(url, headers=None, cookies=None):
     # 获取包含歌手信息的标签
     artists = soup.find_all("a", class_="nm nm-icn f-thide s-fc0")
     artists_data = []
-    # 将歌手名称和url（相对路径）进行存储
+    # 将歌手名称和id进行存储
     for a in artists:
+        artist_url = a.get("href", None)
+        artist_id = re.search(r"id=(\d+)", artist_url).group(1)
         row = {
-            "href": a.get("href", None),
             "name": a.get_text(strip=True),
+            "id": artist_id,
         }
         artists_data.append(row)
     artists_data = pd.DataFrame(artists_data)
-
     return artists_data
 
 
 # 获取歌手详情页信息
-def get_artist_detail(url, headers=None, cookies=None):
+def get_artist_detail(id, headers=None, cookies=None):
     """
-    爬取歌手详情页信息, 获取歌手简介，歌手图片，歌曲url等；
-    其中：歌手基本信息，包含姓名，简介，图片url等返回一个字典；
+    爬取歌手详情页信息, 获取歌手简介，歌手图片，歌曲id等；
+    其中：歌手基本信息，包含姓名，简介，图片url，等返回一个字典；
     其下默认展示在首页的歌曲（100首）的url返回一个表格
     """
+    url = urljoin(base_url, f"artist?id={id}")
     if headers is None:
         headers = {"User-Agent": UserAgent().random}
     response = requests.get(url, headers=headers, cookies=cookies)
@@ -73,15 +75,16 @@ def get_artist_detail(url, headers=None, cookies=None):
         "abstract": abstract,
         "url": url,
     }
-    # 获取歌曲url，并将相对路径拼接为绝对路径
+    # 获取歌曲id
     songs_urls = []
     songs = soup.find_all("a", href=re.compile(r"/song\?id=\d+$"))
     for song in songs:
-        songs_url = urljoin(base_url, song.get("href"))
+        song_url = urljoin(base_url, song.get("href"))
+        song_id = re.search(r"id=(\d+)", song_url).group(1)
         row = {
             "artist": name,
             "name": song.get_text(strip=True),
-            "href": songs_url,
+            "href": song_id,
         }
         songs_urls.append(row)
     songs_urls = pd.DataFrame(songs_urls)
