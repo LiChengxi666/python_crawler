@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 import time
 import random
 import pandas as pd
+import numpy as np
 import re
 from fake_useragent import UserAgent
 import json
@@ -19,19 +20,35 @@ base_url = "https://music.163.com"
 
 # 配置请求信息
 base_headers = {
-        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-        "accept-language": "zh-CN,zh;q=0.9,en-GB;q=0.8,en-US;q=0.7,en;q=0.6",
-        "priority": "u=0, i",
-        "referer": "https://music.163.com/",
-        "sec-ch-ua": '"Google Chrome";v="137", "Chromium";v="137", "Not/A)Brand";v="24"',
-        "sec-ch-ua-mobile": "?0",
-        "sec-ch-ua-platform": '"Windows"',
-        "sec-fetch-dest": "iframe",
-        "sec-fetch-mode": "navigate",
-        "sec-fetch-site": "same-origin",
-        "upgrade-insecure-requests": "1",
-        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
-    }
-with open('cookie.txt','r') as f:
+    "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+    "accept-language": "zh-CN,zh;q=0.9,en-GB;q=0.8,en-US;q=0.7,en;q=0.6",
+    "priority": "u=0, i",
+    "referer": "https://music.163.com/",
+    "sec-ch-ua": '"Google Chrome";v="137", "Chromium";v="137", "Not/A)Brand";v="24"',
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": '"Windows"',
+    "sec-fetch-dest": "iframe",
+    "sec-fetch-mode": "navigate",
+    "sec-fetch-site": "same-origin",
+    "upgrade-insecure-requests": "1",
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+}
+with open("cookie.txt", "r") as f:
     cookie_str = f.read()
 cookies = crawler.parse_cookies(cookie_str)
+
+
+# 从三个页面（华语男歌手，华语女歌手，华语组合）中爬取歌手id）
+cat_ids = {"华语男歌手": "1001", "华语女歌手": "1002", "华语组合": "1003"}
+total_artist_ids = []
+print(f"starting get artist id...")
+for cat, cat_id in cat_ids.items():
+    url = urljoin(base_url, f"discover/artist/cat?id={cat_id}")
+    artists_data = crawler.get_artist_id(url=url, headers=base_headers, cookies=cookies)
+    artists_data_new = artists_data.assign(cat=cat)
+    total_artist_ids.append(artists_data_new)
+    print(f"{cat_id} done")
+    time.sleep(np.random.uniform(1, 3))
+total_artist_ids = pd.concat(total_artist_ids, axis=0, ignore_index=True)
+total_artist_ids.to_csv("./data/artist_ids.csv", index=False)
+print("artist id done")
