@@ -11,6 +11,7 @@ import re
 from fake_useragent import UserAgent
 import json
 from urllib.parse import urljoin
+from tqdm import tqdm
 
 
 # 网易云音乐url
@@ -58,7 +59,8 @@ print("artist id done\n")
 total_songs = []
 artist_details = []
 print(f"starting get artist detail...")
-for artist_id in total_artist_ids.loc[:, "id"]:
+artist_ids = list(total_artist_ids.loc[:, "id"])
+for artist_id in tqdm(artist_ids):
     artist_detail, songs_urls = crawler.get_artist_detail(
         id=artist_id, headers=base_headers, cookies=cookies
     )
@@ -67,6 +69,19 @@ for artist_id in total_artist_ids.loc[:, "id"]:
     print(f"id:{artist_id} done")
 total_songs = pd.concat(total_songs)
 artist_details = pd.DataFrame(artist_details)
-artist_details.to_csv("artist_details.csv", index=False)
-total_songs.to_csv("songs_urls.csv", index=False)
+artist_details.to_csv("./data/artist_details.csv", index=False)
+total_songs.to_csv("./data/songs_urls.csv", index=False)
 print("artist detail done\n")
+
+
+# 获取歌曲详细信息
+gongs_information = []
+print(f"starting get songs detail...")
+song_ids = list(total_songs.loc[:, "id"])
+for song_id in tqdm(song_ids):
+    song_detail = crawler.get_songs_detail(id=song_id, headers=base_headers, cookies=cookies)
+    gongs_information.append(song_detail)
+    print(f"id:{song_id} done")
+songs_information = pd.DataFrame(gongs_information)
+songs_information.to_csv("./data/songs_information.csv", index=False)
+print("songs detail done\n")
