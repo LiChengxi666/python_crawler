@@ -84,11 +84,57 @@ def get_artist_detail(id, headers=None, cookies=None):
         row = {
             "artist": name,
             "name": song.get_text(strip=True),
-            "href": song_id,
+            "id": song_id,
         }
         songs_urls.append(row)
     songs_urls = pd.DataFrame(songs_urls)
     return artist_infomation, songs_urls
+
+
+def get_songs_detail(id, headers=None, cookies=None):
+    """
+    爬取歌曲详情页信息，获取歌曲名称，歌手名称，专辑名称，歌曲简介，歌曲url，歌曲图片url，歌曲时长，歌词等
+    """
+    # 爬取歌曲详情页
+    url = urljoin(base_url, f"song?id={id}")
+    if headers is None:
+        headers = {"User-Agent": UserAgent().random}
+    response = requests.get(url, headers=headers, cookies=cookies)
+    soup = BeautifulSoup(response.text, "html.parser")
+    # 获取歌曲基本信息
+    title = soup.find('meta', property="og:title").get('content')
+    artist = soup.find('meta', property="og:music:artist").get('content')
+    album = soup.find('meta', property="og:music:album").get('content')
+    description = soup.find('meta', property="og:description").get('content')
+    image_url = soup.find('meta', property="og:image").get('content')
+    # 获取歌词（去除时间轴）
+    lyric_url = urljoin(base_url, f"api/song/media?id={id}")
+    lyric_response = requests.get(lyric_url, headers=headers, cookies=cookies)
+    raw_lyric = lyric_response.json()['lyric']
+    lines = raw_lyric.strip().split('\n')
+    time_points = [] 
+    cleaned_lyrics = []  
+    for line in lines:
+        match = re.match(r'^\[(\d{2}:\d{2}\.\d+)\](.*)', line)
+        if match:
+            time_point = match.group(1)  
+            lyric_text = match.group(2).strip() 
+            
+            time_points.append(time_point)
+            cleaned_lyrics.append(lyric_text)
+    lyric = '\n'.join(cleaned_lyrics)
+    result = {
+        'title': title,
+        'artist': artist,
+        'album': album,
+        'description': description,
+        'image_url': image_url,
+        'lyric': lyric,
+        'time_points': time_points,
+        'url': url,
+        'lyric_url': lyric_url,
+    }
+    return result
 
 
 if __name__ == "__main__":
