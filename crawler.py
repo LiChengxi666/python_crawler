@@ -134,7 +134,8 @@ def get_artist_detail(id, headers=None, cookies=None):
         try:
             abstract_meta = soup.find("meta", property="og:abstract")
             if abstract_meta:
-                artist_infomation["abstract"] = abstract_meta.get("content")
+                abstract_text = abstract_meta.get("content")
+                artist_infomation["abstract"] = ''.join(abstract_text.splitlines())
             else:
                 logger.warning("Artist abstract not found")
         except Exception as e:
@@ -280,7 +281,8 @@ def get_songs_detail(id, headers=None, cookies=None):
                     except Exception as e:
                         logger.error(f"Error processing lyric line: {line}, error: {e}")
                         continue
-                result['lyric'] = '\n'.join(cleaned_lyrics)
+                # result['lyric'] = '\n'.join(cleaned_lyrics)
+                result['lyric'] = cleaned_lyrics
                 result['time_points'] = time_points        
             else:
                 logger.warning("Lyric data not found in response")         
