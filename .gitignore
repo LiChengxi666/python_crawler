@@ -3,3 +3,6 @@ test.py
 __pycache__/
 data/
 log.txt
+migrations/
+*.sqlite
+music_website/db.sqlite3
