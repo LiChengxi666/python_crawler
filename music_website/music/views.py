@@ -59,6 +59,7 @@ def singer_list(request):
     }
     return render(request, 'music/singer_list.html', context)
 
+
 def singer_detail(request, singer_id):
     """歌手详情页"""
     singer = get_object_or_404(Singer, id=singer_id)
@@ -70,9 +71,11 @@ def singer_detail(request, singer_id):
     }
     return render(request, 'music/singer_detail.html', context)
 
+
 def search(request):
     """搜索页"""
     return render(request, 'music/search.html')
+
 
 def search_results(request):
     """搜索结果页"""
@@ -122,6 +125,7 @@ def search_results(request):
         'page_obj': results if query else None,
     }
     return render(request, 'music/search_results.html', context)
+
 
 @csrf_exempt
 def delete_comment(request, comment_id):
