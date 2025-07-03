@@ -31,7 +31,7 @@ def song_list(request):
         'current_page': page_number,
         'page_title': '歌曲列表'
     }
-    return render(request, 'music_app/song_list.html', context)
+    return render(request, 'music/song_list.html', context)
 
 def song_detail(request, song_id):
     """歌曲详情页"""
@@ -43,7 +43,7 @@ def song_detail(request, song_id):
         'comments': comments,
         'page_title': song.title
     }
-    return render(request, 'music_app/song_detail.html', context)
+    return render(request, 'music/song_detail.html', context)
 
 def artist_list(request):
     """歌手列表页"""
@@ -64,7 +64,7 @@ def artist_list(request):
         'current_page': page_number,
         'page_title': '歌手列表'
     }
-    return render(request, 'music_app/artist_list.html', context)
+    return render(request, 'music/artist_list.html', context)
 
 def artist_detail(request, artist_id):
     """歌手详情页"""
@@ -76,11 +76,11 @@ def artist_detail(request, artist_id):
         'songs': songs,
         'page_title': artist.name
     }
-    return render(request, 'music_app/artist_detail.html', context)
+    return render(request, 'music/artist_detail.html', context)
 
 def search(request):
     """搜索页"""
-    return render(request, 'music_app/search.html', {'page_title': '搜索'})
+    return render(request, 'music/search.html', {'page_title': '搜索'})
 
 def search_results(request):
     """搜索结果页"""
@@ -129,7 +129,7 @@ def search_results(request):
         'current_page': page_obj.number,
         'page_title': f'搜索结果: {query}'
     }
-    return render(request, 'music_app/search_results.html', context)
+    return render(request, 'music/search_results.html', context)
 
 @require_POST
 @csrf_exempt

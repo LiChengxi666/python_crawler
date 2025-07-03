@@ -4,8 +4,8 @@ from django.db import models
 from django.utils import timezone
 
 
-global image_dir
-image_dir = '/home/python_crawler/data/'
+# global image_dir
+# image_dir = '/home/python_crawler/data/'
 
 
 # Artist
@@ -22,8 +22,8 @@ class Artist(models.Model):
         return self.name
     
     def get_image_path(self):
-        image_name = f'artist_image/{self.id}.jpg'
-        return image_dir + image_name
+        image_name = f'music/artist_image/{self.id}.jpg'
+        return image_name
 
 
 # Song 与artist多对对关联
@@ -43,8 +43,8 @@ class Song(models.Model):
         return f"{self.title} - {self.artist}"
     
     def get_image_path(self):
-        image_name = f'song_image/{self.id}.jpg'
-        return image_dir + image_name
+        image_name = f'music/song_image/{self.id}.jpg'
+        return image_name
     
     def get_artist_obj(self):
         try:

@@ -7,3 +7,5 @@ migrations/
 *.sqlite
 music_website/db.sqlite3
 templates/
+static/
+.gitignore
