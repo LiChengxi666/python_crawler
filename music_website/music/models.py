@@ -22,7 +22,7 @@ class Artist(models.Model):
         return self.name
     
     def get_image_path(self):
-        image_name = f'artist_image/{self.id}'
+        image_name = f'artist_image/{self.id}.jpg'
         return image_dir + image_name
 
 
@@ -43,7 +43,7 @@ class Song(models.Model):
         return f"{self.title} - {self.artist}"
     
     def get_image_path(self):
-        image_name = f'song_image/{self.id}'
+        image_name = f'song_image/{self.id}.jpg'
         return image_dir + image_name
     
     def get_artist_obj(self):

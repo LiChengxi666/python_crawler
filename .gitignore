@@ -6,3 +6,4 @@ log.txt
 migrations/
 *.sqlite
 music_website/db.sqlite3
+templates/
