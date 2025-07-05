@@ -8,9 +8,11 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.utils import timezone
 from .models import Song, Artist, Comment
+from django.contrib import messages
+
 
 def song_list(request):
     """歌曲列表页（主页）"""
@@ -132,32 +134,41 @@ def search_results(request):
     return render(request, 'music/search_results.html', context)
 
 @require_POST
-@csrf_exempt
+@csrf_protect
 def add_comment(request, song_id):
-    """添加评论"""
+    # 使用 get_object_or_404 确保歌曲存在
     song = get_object_or_404(Song, id=song_id)
+    
     content = request.POST.get('content', '').strip()
+    if not content:
+        messages.error(request, '评论内容不能为空！')
+        return redirect('song_detail', song_id=song_id)
     
-    if content:
-        comment = Comment.objects.create(
-            song=song,
-            content=content
+    try:
+        Comment.objects.create(
+            song=song,  # 使用歌曲对象而不是ID
+            content=content,
         )
-        return JsonResponse({
-            'success': True,
-            'comment': {
-                'id': comment.id,
-                'content': comment.content,
-                'created_at': comment.created_at.strftime('%Y-%m-%d %H:%M:%S')
-            }
-        })
+        messages.success(request, '评论添加成功！')
+    except Exception as e:
+        messages.error(request, f'添加评论失败：{str(e)}')
     
-    return JsonResponse({'success': False, 'error': '评论内容不能为空'})
+    return redirect('song_detail', song_id=song_id)
 
 @require_POST
-@csrf_exempt
+@csrf_protect
 def delete_comment(request, comment_id):
-    """删除评论"""
-    comment = get_object_or_404(Comment, id=comment_id)
-    comment.delete()
-    return JsonResponse({'success': True})
+    try:
+        comment = get_object_or_404(Comment, id=comment_id)
+        song_id = comment.song.id
+        comment.delete()
+        messages.success(request, '评论删除成功！')
+    except Exception as e:
+        messages.error(request, f'删除评论失败：{str(e)}')
+        # 如果无法获取song_id，尝试从referer获取
+        referer = request.META.get('HTTP_REFERER', '/')
+        if '/song/' in referer:
+            return redirect(referer)
+        return redirect('song_list')
+    
+    return redirect('song_detail', song_id=song_id)
