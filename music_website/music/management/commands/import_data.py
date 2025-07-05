@@ -8,7 +8,7 @@ class Command(BaseCommand):
     
     def handle(self, *args, **options):
         # 导入歌手数据, 使用id做唯一标识
-        artist_csv_path = '/home/python_crawler/data/artist_information.csv'
+        artist_csv_path = '/home/python_crawler/music_website/data/artist_information.csv'
         if os.path.exists(artist_csv_path):
             with open(artist_csv_path, 'r', encoding='utf-8') as file:
                 reader = csv.DictReader(file)
@@ -30,7 +30,7 @@ class Command(BaseCommand):
                 self.stdout.write(f'Successfully imported {artists_created} artists')
         
         # 导入歌曲数据，使用id做唯一标识
-        song_csv_path = '/home/python_crawler/data/song_information.csv'
+        song_csv_path = '/home/python_crawler/music_website/data/song_information_new.csv'
         if os.path.exists(song_csv_path):
             with open(song_csv_path, 'r', encoding='utf-8') as file:
                 reader = csv.DictReader(file)

@@ -91,5 +91,5 @@ for song_id in tqdm(song_ids):
     print(f"id:{song_id} done")
     time.sleep(np.random.uniform(0.5, 1))
 songs_information = pd.DataFrame(gongs_information)
-songs_information.to_csv("./data/songs_information.csv", index=False)
+songs_information.to_csv("./data/songs_information_new.csv", index=False)
 print("songs detail done\n")

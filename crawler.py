@@ -272,7 +272,7 @@ def get_songs_detail(id, headers=None, cookies=None):
                 cleaned_lyrics = []      
                 for line in lines:
                     try:
-                        match = re.match(r'^\[(\d{2}:\d{2}\.\d+)\](.*)', line)
+                        match = re.match(r'^\[(\d+:\d+\.\d+)\](.*)', line)
                         if match:
                             time_point = match.group(1)  
                             lyric_text = match.group(2).strip()                         
@@ -281,8 +281,8 @@ def get_songs_detail(id, headers=None, cookies=None):
                     except Exception as e:
                         logger.error(f"Error processing lyric line: {line}, error: {e}")
                         continue
-                # result['lyric'] = '\n'.join(cleaned_lyrics)
-                result['lyric'] = cleaned_lyrics
+                result['lyric'] = '\n'.join(cleaned_lyrics)
+                # result['lyric'] = cleaned_lyrics
                 result['time_points'] = time_points        
             else:
                 logger.warning("Lyric data not found in response")         
