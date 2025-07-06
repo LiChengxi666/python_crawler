@@ -1,0 +1,173 @@
+<!-- templates/music/search_results.html -->
+{% extends 'music/base.html' %}
+
+{% block title %}搜索结果 - 音乐网站{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1 class="card-title">🔍 搜索结果</h1>
+        <p>搜索关键词: <strong>"{{ query }}"</strong></p>
+        <p>搜索类型: <strong>{% if search_type == 'song' %}歌曲{% else %}歌手{% endif %}</strong></p>
+        <p>找到 <strong>{{ total_count }}</strong> 个结果，用时 <strong>{{ search_time }}</strong> 秒</p>
+    </div>
+
+    <!-- 重新搜索表单 -->
+    <form method="get" action="{% url 'search_results' %}" class="search-form">
+        <input type="text" name="q" class="search-input" placeholder="搜索..." maxlength="20" value="{{ query }}">
+        <div class="search-options">
+            <input type="radio" id="search-song" name="type" value="song" {% if search_type == 'song' %}checked{% endif %}>
+            <label for="search-song">歌曲</label>
+            <input type="radio" id="search-artist" name="type" value="artist" {% if search_type == 'artist' %}checked{% endif %}>
+            <label for="search-artist">歌手</label>
+        </div>
+        <button type="submit" class="search-btn">搜索</button>
+    </form>
+
+    <!-- 结果表格 -->
+    {% if search_type == 'song' %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>封面</th>
+                <th>歌曲名</th>
+                <th>歌手</th>
+                <th>专辑</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for song in page_obj %}
+            <tr>
+                <td>
+                    <img src="{{ song.image_url }}" alt="{{ song.title }}" onerror="handleImageError(this)">
+                </td>
+                <td>
+                    <a href="{% url 'song_detail' song.id %}" style="color: var(--primary-color); text-decoration: none;">
+                        {{ song.title }}
+                    </a>
+                </td>
+                <td>
+                    {% if song.get_artist_obj %}
+                        <a href="{% url 'artist_detail' song.get_artist_obj.id %}" style="color: var(--primary-color); text-decoration: none;">
+                            {{ song.artist }}
+                        </a>
+                    {% else %}
+                        {{ song.artist }}
+                    {% endif %}
+                </td>
+                <td>{{ song.album|default:"未知专辑" }}</td>
+                <td>
+                    <a href="{% url 'song_detail' song.id %}" class="btn btn-primary">查看详情</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align: center; padding: 2rem;">
+                    没有找到匹配的歌曲
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>头像</th>
+                <th>歌手名</th>
+                <th>简介</th>
+                <th>分类</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for artist in page_obj %}
+            <tr>
+                <td>
+                    <img src="{{ artist.image_url }}" alt="{{ artist.name }}" onerror="handleImageError(this)">
+                </td>
+                <td>
+                    <a href="{% url 'artist_detail' artist.id %}" style="color: var(--primary-color); text-decoration: none;">
+                        {{ artist.name }}
+                    </a>
+                </td>
+                <td>
+                    {% if artist.abstract %}
+                        {{ artist.abstract|truncatechars:100 }}
+                    {% else %}
+                        <span style="color: #666; font-style: italic;">暂无简介</span>
+                    {% endif %}
+                </td>
+                <td>{{ artist.cat|default:"未分类" }}</td>
+                <td>
+                    <a href="{% url 'artist_detail' artist.id %}" class="btn btn-primary">查看详情</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align: center; padding: 2rem;">
+                    没有找到匹配的歌手
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    <!-- 分页 -->
+    {% if page_obj.has_other_pages %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+            <a href="?q={{ query }}&type={{ search_type }}&page=1">首页</a>
+            <a href="?q={{ query }}&type={{ search_type }}&page={{ page_obj.previous_page_number }}">上一页</a>
+        {% else %}
+            <span class="disabled">首页</span>
+            <span class="disabled">上一页</span>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            {% if num == page_obj.number %}
+                <span class="current">{{ num }}</span>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <a href="?q={{ query }}&type={{ search_type }}&page={{ num }}">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <a href="?q={{ query }}&type={{ search_type }}&page={{ page_obj.next_page_number }}">下一页</a>
+            <a href="?q={{ query }}&type={{ search_type }}&page={{ total_pages }}">尾页</a>
+        {% else %}
+            <span class="disabled">下一页</span>
+            <span class="disabled">尾页</span>
+        {% endif %}
+
+        <div class="page-jump">
+            <span>跳转到</span>
+            <input type="number" min="1" max="{{ total_pages }}" placeholder="页码">
+            <button class="btn btn-primary" onclick="jumpToPageWithParams({{ total_pages }}, '{{ query }}', '{{ search_type }}')">跳转</button>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<div style="margin-top: 1rem;">
+    <a href="{% url 'search' %}" class="btn btn-primary">← 返回搜索</a>
+</div>
+
+<script>
+function jumpToPageWithParams(totalPages, query, searchType) {
+    const input = document.querySelector('.page-jump input');
+    const page = parseInt(input.value);
+    if (page >= 1 && page <= totalPages) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('page', page);
+        url.searchParams.set('q', query);
+        url.searchParams.set('type', searchType);
+        window.location.href = url.toString();
+    } else {
+        alert('请输入有效的页码！');
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,51 @@
+<!-- templates/music/search.html -->
+{% extends 'music/base.html' %}
+
+{% block title %}搜索 - 音乐网站{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1 class="card-title">🔍 搜索音乐</h1>
+    </div>
+
+    <form method="get" action="{% url 'search_results' %}" style="text-align: center; padding: 2rem;">
+        <div style="max-width: 600px; margin: 0 auto;">
+            <div style="margin-bottom: 2rem;">
+                <input type="text" name="q" class="search-input" 
+                       placeholder="请输入搜索关键词..." 
+                       maxlength="20" 
+                       value="{{ request.GET.q }}"
+                       style="width: 100%; font-size: 1.1rem; padding: 1rem; text-align: center;"
+                       required>
+            </div>
+
+            <div style="margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                        <input type="radio" name="type" value="song" checked>
+                        <span style="font-size: 1.1rem;">🎵 搜索歌曲</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                        <input type="radio" name="type" value="artist">
+                        <span style="font-size: 1.1rem;">🎤 搜索歌手</span>
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" class="search-btn" style="font-size: 1.1rem; padding: 1rem 2rem;">
+                🔍 开始搜索
+            </button>
+        </div>
+    </form>
+
+    <div style="text-align: center; margin-top: 2rem; color: #666;">
+        <p>💡 搜索提示：</p>
+        <ul style="list-style: none; padding: 0; margin: 1rem 0;">
+            <li>• 歌曲搜索：支持按歌曲名、歌手名、歌词搜索</li>
+            <li>• 歌手搜索：支持按歌手名、简介搜索</li>
+            <li>• 关键词长度不超过20个字符</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

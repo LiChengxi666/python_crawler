@@ -1,0 +1,168 @@
+<!-- templates/music/song_detail.html -->
+{% extends 'music/base.html' %}
+
+{% block title %}{{ song.title }} - 歌曲详情{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; gap: 2rem; margin-bottom: 2rem; flex-wrap: wrap;">
+        <div style="flex-shrink: 0;">
+            {% load static %}
+            <img src="{% static song.get_image_path%}" alt="{{ song.title }}" 
+                 style="width: 200px; height: 200px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);"
+                 onerror="handleImageError(this)">
+        </div>
+        <div style="flex: 1; min-width: 300px;">
+            <h1 style="color: var(--primary-color); margin-bottom: 1rem;">{{ song.title }}</h1>
+            <p style="margin-bottom: 0.5rem;"><strong>歌手:</strong> 
+                {% if song.get_artist_obj %}
+                    <a href="{% url 'artist_detail' song.get_artist_obj.id %}" style="color: var(--primary-color); text-decoration: none;">
+                        {{ song.artist }}
+                    </a>
+                {% else %}
+                    {{ song.artist }}
+                {% endif %}
+            </p>
+            <p style="margin-bottom: 0.5rem;"><strong>专辑:</strong> {{ song.album|default:"未知专辑" }}</p>
+            {% if song.description %}
+                <p style="margin-bottom: 1rem;"><strong>描述:</strong> {{ song.description }}</p>
+            {% endif %}
+            {% if song.url %}
+                <p style="margin-bottom: 1rem;">
+                    <a href="{{ song.url }}" target="_blank" class="btn btn-primary">🔗 访问原始网站</a>
+                </p>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if song.lyric %}
+    <div class="card-header">
+        <h3>歌词</h3>
+    </div>
+    <div style="background-color: var(--hover-color); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; white-space: pre-wrap; font-family: monospace;">{{ song.lyric }}</div>
+    {% endif %}
+
+    <!-- 评论区 -->
+    <div class="card-header">
+        <h3>评论 ({{ comments.count }})</h3>
+    </div>
+
+    <!-- 评论表单 -->
+    <form method="post" action="{% url 'add_comment' song.id %}" style="margin-bottom: 2rem;">
+        {% csrf_token %}
+        <div style="margin-bottom: 1rem;">
+            <textarea name="content" rows="4" placeholder="写下你的评论..." 
+                    style="width: 100%; padding: 1rem; border: 2px solid var(--border-color); border-radius: 4px; background-color: var(--background-color); color: var(--text-color); resize: vertical;" 
+                    required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">发表评论</button>
+    </form>
+
+    <!-- 评论列表 -->
+    <div>
+        {% for comment in comments %}
+        <div style="border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; background-color: var(--hover-color);" data-comment-id="{{ comment.id }}">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                <div style="flex: 1;">
+                    <div style="white-space: pre-wrap; line-height: 1.6;">{{ comment.content }}</div>
+                </div>
+                <form method="post" action="{% url 'delete_comment' comment.id %}" style="margin-left: 1rem;" onsubmit="return confirm('确定要删除这条评论吗?')">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">删除</button>
+                </form>
+            </div>
+            <div style="font-size: 0.9rem; color: #666;">
+                {{ comment.created_at|date:"Y-m-d H:i:s" }}
+            </div>
+        </div>
+        {% empty %}
+        <p style="text-align: center; color: #666; font-style: italic;">暂无评论，快来发表第一条评论吧！</p>
+        {% endfor %}
+    </div>
+</div>
+
+<div style="margin-top: 1rem;">
+    <a href="{% url 'song_list' %}" class="btn btn-primary">← 返回歌曲列表</a>
+</div>
+{% endblock %}
+
+{% comment %} {% block script %}
+<script>
+    // 获取 CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // 添加评论
+    document.getElementById('commentForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const content = document.getElementById('commentContent').value.trim();
+        
+        if (!content) {
+            alert('请输入评论内容');
+            return;
+        }
+        
+        const formData = new FormData();
+        formData.append('content', content);
+        formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+        
+        fetch(`{% url 'add_comment' song.id %}`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (response.ok) {
+                // 成功后刷新页面
+                location.reload();
+            } else {
+                alert('添加评论失败');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('添加评论失败');
+        });
+    });
+    
+    // 删除评论
+    function deleteComment(event, commentId) {
+        event.preventDefault();
+        
+        if (confirm('确定要删除这条评论吗?')) {
+            const formData = new FormData();
+            formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+            
+            fetch(`{% url 'delete_comment' 0 %}`.replace('0', commentId), {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    // 成功后刷新页面
+                    location.reload();
+                } else {
+                    alert('删除评论失败');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('删除评论失败');
+            });
+        }
+        
+        return false;
+    }
+</script>
+{% endblock %} {% endcomment %}

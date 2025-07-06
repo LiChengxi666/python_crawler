@@ -1,0 +1,400 @@
+<!-- templates/music/base.html -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}音乐网站{% endblock %}</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --background-color: #f8f9fa;
+            --text-color: #333;
+            --border-color: #ddd;
+            --hover-color: #e8f4f8;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #3498db;
+            --secondary-color: #34495e;
+            --background-color: #2c3e50;
+            --text-color: #ecf0f1;
+            --border-color: #34495e;
+            --hover-color: #34495e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* 导航栏 */
+        .navbar {
+            background-color: var(--secondary-color);
+            padding: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .navbar-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+        }
+
+        .navbar-nav {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .navbar-nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .navbar-nav a:hover {
+            background-color: var(--primary-color);
+        }
+
+        /* 主题切换按钮 */
+        .theme-toggle {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            opacity: 0.8;
+        }
+
+        /* 搜索表单 */
+        .search-form {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .search-options {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .search-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-btn:hover {
+            opacity: 0.8;
+        }
+
+        /* 主要内容区域 */
+        .main-content {
+            padding: 2rem 0;
+            min-height: calc(100vh - 200px);
+        }
+
+        /* 表格样式 */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background-color: var(--background-color);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .table th,
+        .table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table th {
+            background-color: var(--secondary-color);
+            color: white;
+            font-weight: bold;
+        }
+
+        .table tr:hover {
+            background-color: var(--hover-color);
+        }
+
+        .table img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        /* 分页 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .pagination a,
+        .pagination span {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .pagination a:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .pagination .current {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .pagination .disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .page-jump {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-left: 1rem;
+        }
+
+        .page-jump input {
+            width: 60px;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            text-align: center;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .navbar-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .navbar-nav {
+                justify-content: center;
+            }
+
+            .search-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-input {
+                min-width: auto;
+            }
+
+            .table {
+                font-size: 0.9rem;
+            }
+
+            .table th,
+            .table td {
+                padding: 0.5rem;
+            }
+
+            .pagination {
+                gap: 0.25rem;
+            }
+
+            .pagination a,
+            .pagination span {
+                padding: 0.25rem 0.5rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* 卡片样式 */
+        .card {
+            background-color: var(--background-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+        }
+
+        .card-header {
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        /* 按钮样式 */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.8;
+        }
+
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            opacity: 0.8;
+        }
+
+        /* 页脚 */
+        .footer {
+            background-color: var(--secondary-color);
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-content">
+                <a href="{% url 'song_list' %}" class="navbar-brand">🎵 音乐网站</a>
+                <ul class="navbar-nav">
+                    <li><a href="{% url 'song_list' %}">歌曲列表</a></li>
+                    <li><a href="{% url 'artist_list' %}">歌手列表</a></li>
+                    <li><a href="{% url 'search' %}">搜索</a></li>
+                </ul>
+                <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="main-content">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 音乐网站. 所有权利保留.</p>
+        </div>
+    </footer>
+
+    <script>
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        // 页面加载时应用保存的主题
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.body.setAttribute('data-theme', savedTheme);
+        });
+
+        // 页面跳转函数
+        function jumpToPage(totalPages) {
+            const input = document.querySelector('.page-jump input');
+            const page = parseInt(input.value);
+            if (page >= 1 && page <= totalPages) {
+                const url = new URL(window.location.href);
+                url.searchParams.set('page', page);
+                window.location.href = url.toString();
+            } else {
+                alert('请输入有效的页码！');
+            }
+        }
+
+        // 图片错误处理
+        function handleImageError(img) {
+            img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjZjBmMGYwIi8+CjxwYXRoIGQ9Ik0zMCAyMEM0NC4zNTUgMjAgNTYgMzEuNjQ1IDU2IDQ2QzU2IDYwLjM1NSA0NC4zNTUgNzIgMzAgNzJDMTUuNjQ1IDcyIDQgNjAuMzU1IDQgNDZDNCAzMS42NDUgMTUuNjQ1IDIwIDMwIDIwWiIgZmlsbD0iI2RkZCIvPgo8dGV4dCB4PSIzMCIgeT0iNTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM5OTkiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiI+5o6S6L+HAPC/l88NCjwvdGV4dD4KPC9zdmc+';
+            img.onerror = null;
+        }
+    </script>
+</body>
+</html>

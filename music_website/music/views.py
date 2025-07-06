@@ -17,7 +17,7 @@ from django.contrib import messages
 def song_list(request):
     """歌曲列表页（主页）"""
     songs = Song.objects.all().order_by('title')
-    paginator = Paginator(songs, 20)  # 每页20首歌
+    paginator = Paginator(songs, 50)  # 每页20首歌
     
     page_number = request.GET.get('page', 1)
     try:
