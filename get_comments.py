@@ -1,6 +1,8 @@
 '''
 这部分代码参考了网络资源：
-https://github.com/Tobby-star/music_comment.git
+https://github.com/zyingzhou/music163-spiders/blob/master/get_comments.py
+来自github仓库：
+https://github.com/zyingzhou/music163-spiders.git
 '''
 import requests
 import json
@@ -11,6 +13,8 @@ from Crypto.Util.Padding import pad
 import random
 import string
 import crawler
+import pandas as pd
+from tqdm import tqdm
 
 
 # 配置请求信息
@@ -149,16 +153,54 @@ def extract_top_comments(json_data):
 
 # 使用示例
 if __name__ == "__main__":
-    song_id = 1472921626
-    result = get_song_comments(base_headers, cookies, song_id, offset=0, limit=20)
-    top_comments, total_count = extract_top_comments(result)
-    # with open(f"{song_id}_top_comments.json", "w", encoding="utf-8") as f:
-    #     json.dump(result, f, ensure_ascii=False, indent=2)
-    if result:
-        print("请求成功!")
-        # print(f"返回数据: {json.dumps(result, ensure_ascii=False, indent=2)}")
-        print("评论总数:", total_count)
-        for comment in top_comments:
-            print(f"内容: {comment['content']}, 点赞数: {comment['likedCount']}, 时间: {comment['time']}")
-    else:
-        print("请求失败")
+    song_information = pd.read_csv("/home/python_crawler/music_website/data/song_information_new.csv")
+    song_ids = list(song_information.loc[:, "id"])
+    song_names = list(song_information.loc[:, "title"])
+    comments_information = []
+    comments_counts = []
+    for song_id, song_name in tqdm(zip(song_ids, song_names)):
+        comment_json = get_song_comments(headers=base_headers, cookies=cookies, song_id=song_id)
+        if "hotComments" in comment_json["data"]:
+            if comment_json["data"]["hotComments"] is not None:
+                comments, total_count = extract_top_comments(comment_json)
+                comments_counts.append({
+                    "song_name": song_name,
+                    "song_id": song_id,
+                    "total_count": total_count
+                })
+                if len(comments) != 0:
+                    for comment in comments:
+                        comments_information.append({
+                            "song_name": song_name,
+                            "song_id": song_id,
+                            "comment": comment['content'],
+                            "time": comment['time'],
+                            "liked": comment['likedCount']
+                        })
+                    print(f"获取{song_name}的评论成功！共{len(comments)}条评论")
+            else:
+                print(f"获取{song_name}的评论失败！")
+                comments_counts.append({
+                    "song_name": song_name,
+                    "song_id": song_id,
+                    "total_count": comment_json["data"]["totalCount"]
+                })
+        else:
+            if not comment_json["data"]["totalCount"]:
+                print(f"获取{song_name}的评论失败！无评论")
+                comments_counts.append({
+                    "song_name": song_name,
+                    "song_id": song_id,
+                    "total_count":  0
+                })
+            else:
+                comments_counts.append({
+                    "song_name": song_name,
+                    "song_id": song_id,
+                    "total_count":  comment_json["data"]["totalCount"]
+                })
+                print(f"获取{song_name}的评论失败！无热评")
+        comments_counts_df = pd.DataFrame(comments_counts)
+        comments_information_df = pd.DataFrame(comments_information)
+        comments_information_df.to_csv("/home/python_crawler/data/comments_information_2.csv", index=True)
+        comments_counts_df.to_csv("/home/python_crawler/data/comments_counts_2.csv", index=True)
