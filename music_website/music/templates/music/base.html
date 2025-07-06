@@ -6,23 +6,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}音乐网站{% endblock %}</title>
     <style>
+        {% comment %} 颜色表 {% endcomment %}
         :root {
-            --primary-color: #3498db;
-            --secondary-color: #2c3e50;
-            --background-color: #f8f9fa;
-            --text-color: #333;
-            --border-color: #ddd;
-            --hover-color: #e8f4f8;
+            --primary-color: #00668c;
+            --secondary-color: #3b3c3d;
+            --background-color: #fffefb;
+            --text-color: #1d1c1c;
+            --border-color: #b6ccd8;
+            --hover-color: #f5f4f1;
+            --secondary-text-color: #fffefb;
         }
 
         [data-theme="dark"] {
-            --primary-color: #3498db;
-            --secondary-color: #34495e;
-            --background-color: #2c3e50;
-            --text-color: #ecf0f1;
-            --border-color: #34495e;
-            --hover-color: #34495e;
+            --primary-color: #acc2ef;
+            --secondary-color: #374357;
+            --background-color: #1f2b3e;
+            --text-color: #FFFFFF;
+            --border-color: #4d648d;
+            --hover-color: #1F3A5F;
+            --secondary-text-color: #1f2b3e;
         }
+        {% comment %} --primary-100: #1F3A5F;
+        --primary-200: #4d648d;
+        --primary-300: #acc2ef;
+        --accent-100: #3D5A80;
+        --accent-200: #cee8ff;
+        --text-100: #FFFFFF;
+        --text-200: #e0e0e0;
+        --bg-100: #0F1C2E;
+        --bg-200: #1f2b3e;
+        --bg-300: #374357; {% endcomment %}
+          
 
         * {
             margin: 0;
@@ -80,7 +94,8 @@
             transition: background-color 0.3s;
         }
 
-        .navbar-nav a:hover {
+        .navbar-nav a:hover,
+        .navbar-nav a.active {
             background-color: var(--primary-color);
         }
 
@@ -126,7 +141,7 @@
 
         .search-btn {
             background: var(--primary-color);
-            color: white;
+            color: var(--secondary-text-color);
             border: none;
             padding: 0.75rem 1.5rem;
             border-radius: 4px;
@@ -308,7 +323,8 @@
 
         .btn-primary {
             background-color: var(--primary-color);
-            color: white;
+            color: var(--secondary-text-color);
+            {% comment %} color: white; {% endcomment %}
         }
 
         .btn-primary:hover {
@@ -340,9 +356,12 @@
             <div class="navbar-content">
                 <a href="{% url 'song_list' %}" class="navbar-brand">🎵 音乐网站</a>
                 <ul class="navbar-nav">
-                    <li><a href="{% url 'song_list' %}">歌曲列表</a></li>
-                    <li><a href="{% url 'artist_list' %}">歌手列表</a></li>
-                    <li><a href="{% url 'search' %}">搜索</a></li>
+                    <li><a href="{% url 'song_list' %}" 
+                           class="{% if request.resolver_match.url_name == 'song_list' %}active{% endif %}">歌曲列表</a></li>
+                    <li><a href="{% url 'artist_list' %}" 
+                           class="{% if request.resolver_match.url_name == 'artist_list' %}active{% endif %}">歌手列表</a></li>
+                    <li><a href="{% url 'search' %}" 
+                           class="{% if request.resolver_match.url_name == 'search' %}active{% endif %}">搜索</a></li>
                 </ul>
                 <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
             </div>
