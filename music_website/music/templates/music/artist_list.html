@@ -12,13 +12,9 @@
 
     <!-- 搜索表单 -->
     <form method="get" action="{% url 'search_results' %}" class="search-form">
-        <input type="text" name="query" class="search-input" placeholder="搜索歌手..." maxlength="20" value="{{ request.GET.query }}">
-        <div class="search-options">
-            <input type="radio" id="search-song" name="type" value="song">
-            <label for="search-song">歌曲</label>
-            <input type="radio" id="search-artist" name="type" value="artist" checked>
-            <label for="search-artist">歌手</label>
-        </div>
+        <input type="text" name="q" class="search-input" placeholder="搜索歌手..." maxlength="20" value="{{ request.GET.query }}">
+        <!-- type固定为artist -->
+        <input type="hidden" name="type" value="artist">
         <button type="submit" class="search-btn">搜索</button>
     </form>
 
