@@ -16,13 +16,13 @@ class Artist(models.Model):
     abstract = models.TextField(blank=True, null=True)
     url = models.URLField(blank=True, null=True)
     cat = models.CharField(max_length=100, blank=True, null=True)
-    songs = models.ManyToManyField('Song', related_name='artists')
+    songs = models.ManyToManyField("Song", related_name="artists")
 
     def __str__(self):
         return self.name
-    
+
     def get_image_path(self):
-        image_name = f'music/artist_image/{self.id}.jpg'
+        image_name = f"music/artist_image/{self.id}.jpg"
         return image_name
 
 
@@ -38,14 +38,14 @@ class Song(models.Model):
     time_points = models.TextField(blank=True, null=True)
     url = models.URLField(blank=True, null=True)
     lyric_url = models.URLField(blank=True, null=True)
-    
+
     def __str__(self):
         return f"{self.title} - {self.artist}"
-    
+
     def get_image_path(self):
-        image_name = f'music/song_image/{self.id}.jpg'
+        image_name = f"music/song_image/{self.id}.jpg"
         return image_name
-    
+
     def get_artist_obj(self):
         try:
             return Artist.objects.filter(name=self.artist).first()
@@ -55,12 +55,12 @@ class Song(models.Model):
 
 # comment
 class Comment(models.Model):
-    song = models.ForeignKey(Song, on_delete=models.CASCADE, related_name='comments')
+    song = models.ForeignKey(Song, on_delete=models.CASCADE, related_name="comments")
     content = models.TextField()
     created_at = models.DateTimeField(default=timezone.now)
-    
+
     class Meta:
-        ordering = ['-created_at']
-    
+        ordering = ["-created_at"]
+
     def __str__(self):
         return f"Comment on {self.song.title}: {self.content[:50]}"

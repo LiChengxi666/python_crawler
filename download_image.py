@@ -21,7 +21,7 @@ for artist_url, artist_id in tqdm(zip(artist_image_urls, artist_ids)):
         with open(f"./data/artist_image/{artist_id}.jpg", "wb") as file:
             file.write(response.content)
     except Exception as e:
-            logger.error(f"Error getting song description: {e}")
+        logger.error(f"Error getting song description: {e}")
 
 
 song_information = pd.read_csv("./data/song_information.csv")
@@ -33,4 +33,4 @@ for song_url, song_id in tqdm(zip(song_image_urls, song_ids)):
         with open(f"./data/song_image/{song_id}.jpg", "wb") as file:
             file.write(response.content)
     except Exception as e:
-            logger.error(f"Error getting song description: {e}")
+        logger.error(f"Error getting song description: {e}")

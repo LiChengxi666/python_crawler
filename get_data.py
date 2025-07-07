@@ -84,7 +84,9 @@ gongs_information = []
 print(f"starting get songs detail...")
 song_ids = list(total_songs.loc[:, "id"])
 for song_id in tqdm(song_ids):
-    song_detail = crawler.get_songs_detail(id=song_id, headers=base_headers, cookies=cookies)
+    song_detail = crawler.get_songs_detail(
+        id=song_id, headers=base_headers, cookies=cookies
+    )
     gongs_information.append(song_detail)
     songs_inf = pd.DataFrame(gongs_information)
     songs_inf.to_csv("./data/songs_information.csv", index=False)
