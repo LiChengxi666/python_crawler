@@ -15,6 +15,13 @@
         <input type="text" name="q" class="search-input" placeholder="搜索歌曲..." maxlength="20" value="{{ request.GET.query }}">
         <!-- type固定为song -->
         <input type="hidden" name="type" value="song">
+        <select name="field" id="search-field-results" class="search-select-small">
+            <option value="all" {% if search_field == 'all' %}selected{% endif %}>全部字段</option>
+            <!-- 歌曲搜索字段 -->
+            <option value="title" class="song-field" {% if search_field == 'title' %}selected{% endif %}>歌曲名</option>
+            <option value="artist" class="song-field" {% if search_field == 'artist' %}selected{% endif %}>歌手名</option>
+            <option value="lyric" class="song-field" {% if search_field == 'lyric' %}selected{% endif %}>歌词</option>
+        </select>
         <button type="submit" class="search-btn">搜索</button>
     </form>
 

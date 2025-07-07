@@ -23,14 +23,46 @@
             <div style="margin-bottom: 2rem;">
                 <div style="display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap;">
                     <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                        <input type="radio" name="type" value="song" checked>
+                        <input type="radio" name="type" value="song" 
+                               {% if request.GET.type == 'song' or not request.GET.type %}checked{% endif %}
+                               onchange="updateSearchFields()">
                         <span style="font-size: 1.1rem;">🎵 搜索歌曲</span>
                     </label>
                     <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                        <input type="radio" name="type" value="artist">
+                        <input type="radio" name="type" value="artist"
+                               {% if request.GET.type == 'artist' %}checked{% endif %}
+                               onchange="updateSearchFields()">
                         <span style="font-size: 1.1rem;">🎤 搜索歌手</span>
                     </label>
                 </div>
+            </div>
+
+            <div style="margin-bottom: 2rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-size: 1.1rem; color: #333;">
+                    🎯 搜索字段：
+                </label>
+                <select name="field" id="search-field" class="search-select">
+                    <option value="all" {% if request.GET.field == 'all' or not request.GET.field %}selected{% endif %}>
+                        全部字段
+                    </option>
+                    <!-- 歌曲搜索字段 -->
+                    <option value="title" class="song-field" {% if request.GET.field == 'title' %}selected{% endif %}>
+                        歌曲名
+                    </option>
+                    <option value="artist" class="song-field" {% if request.GET.field == 'artist' %}selected{% endif %}>
+                        歌手名
+                    </option>
+                    <option value="lyric" class="song-field" {% if request.GET.field == 'lyric' %}selected{% endif %}>
+                        歌词
+                    </option>
+                    <!-- 歌手搜索字段 -->
+                    <option value="name" class="artist-field" {% if request.GET.field == 'name' %}selected{% endif %}>
+                        歌手名
+                    </option>
+                    <option value="abstract" class="artist-field" {% if request.GET.field == 'abstract' %}selected{% endif %}>
+                        简介
+                    </option>
+                </select>
             </div>
 
             <button type="submit" class="search-btn" style="font-size: 1.1rem; padding: 1rem 2rem;">
@@ -42,10 +74,53 @@
     <div style="text-align: center; margin-top: 2rem; color: #666;">
         <p>💡 搜索提示：</p>
         <ul style="list-style: none; padding: 0; margin: 1rem 0;">
-            <li>• 歌曲搜索：支持按歌曲名、歌手名、歌词搜索</li>
-            <li>• 歌手搜索：支持按歌手名、简介搜索</li>
+            <li id="song-tips">• 歌曲搜索：支持按歌曲名、歌手名、歌词或全部字段搜索</li>
+            <li id="artist-tips" style="display: none;">• 歌手搜索：支持按歌手名、简介或全部字段搜索</li>
             <li>• 关键词长度不超过20个字符</li>
+            <li>• 选择特定字段可获得更精确的搜索结果</li>
         </ul>
     </div>
 </div>
+
+<script>
+function updateSearchFields() {
+    const searchType = document.querySelector('input[name="type"]:checked').value;
+    const searchField = document.getElementById('search-field');
+    const songTips = document.getElementById('song-tips');
+    const artistTips = document.getElementById('artist-tips');
+    
+    // 隐藏所有字段选项
+    const songFields = document.querySelectorAll('.song-field');
+    const artistFields = document.querySelectorAll('.artist-field');
+    
+    if (searchType === 'song') {
+        // 显示歌曲搜索字段
+        songFields.forEach(field => field.style.display = 'block');
+        artistFields.forEach(field => field.style.display = 'none');
+        songTips.style.display = 'list-item';
+        artistTips.style.display = 'none';
+        
+        // 如果当前选择的是歌手字段，重置为全部字段
+        if (['name', 'abstract'].includes(searchField.value)) {
+            searchField.value = 'all';
+        }
+    } else {
+        // 显示歌手搜索字段
+        songFields.forEach(field => field.style.display = 'none');
+        artistFields.forEach(field => field.style.display = 'block');
+        songTips.style.display = 'none';
+        artistTips.style.display = 'list-item';
+        
+        // 如果当前选择的是歌曲字段，重置为全部字段
+        if (['title', 'artist', 'lyric'].includes(searchField.value)) {
+            searchField.value = 'all';
+        }
+    }
+}
+
+// 页面加载时初始化
+document.addEventListener('DOMContentLoaded', function() {
+    updateSearchFields();
+});
+</script>
 {% endblock %}

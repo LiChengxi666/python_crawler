@@ -85,6 +85,7 @@ def search_results(request):
     """搜索结果页"""
     query = request.GET.get("q", "").strip()
     search_type = request.GET.get("type", "song")
+    search_field = request.GET.get("field", "all")  # 新增：搜索字段
 
     if not query:
         return redirect("search")
@@ -94,19 +95,31 @@ def search_results(request):
     total_count = 0
 
     if search_type == "song":
-        # 搜索歌曲：歌曲名、歌手名、歌词
-        songs = Song.objects.filter(
-            Q(title__icontains=query)
-            | Q(artist__icontains=query)
-            | Q(lyric__icontains=query)
-        ).distinct()
+        # 根据选择的字段搜索歌曲
+        if search_field == "title":
+            songs = Song.objects.filter(title__icontains=query).distinct()
+        elif search_field == "artist":
+            songs = Song.objects.filter(artist__icontains=query).distinct()
+        elif search_field == "lyric":
+            songs = Song.objects.filter(lyric__icontains=query).distinct()
+        else:  # search_field == "all"
+            songs = Song.objects.filter(
+                Q(title__icontains=query)
+                | Q(artist__icontains=query)
+                | Q(lyric__icontains=query)
+            ).distinct()
         results = songs
         total_count = songs.count()
     else:  # search_type == 'artist'
-        # 搜索歌手：歌手名、简介
-        artists = Artist.objects.filter(
-            Q(name__icontains=query) | Q(abstract__icontains=query)
-        ).distinct()
+        # 根据选择的字段搜索歌手
+        if search_field == "name":
+            artists = Artist.objects.filter(name__icontains=query).distinct()
+        elif search_field == "abstract":
+            artists = Artist.objects.filter(abstract__icontains=query).distinct()
+        else:  # search_field == "all"
+            artists = Artist.objects.filter(
+                Q(name__icontains=query) | Q(abstract__icontains=query)
+            ).distinct()
         results = artists
         total_count = artists.count()
 
@@ -121,6 +134,7 @@ def search_results(request):
         "page_obj": page_obj,
         "query": query,
         "search_type": search_type,
+        "search_field": search_field,  # 新增：传递搜索字段到模板
         "total_count": total_count,
         "search_time": round(search_time, 3),
         "total_pages": paginator.num_pages,
