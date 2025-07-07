@@ -185,6 +185,53 @@
 </div>
 
 <script>
+{% comment %} 高亮搜索关键词 {% endcomment %}
+function highlightKeyword(text, keyword) {
+    if (!keyword || keyword.trim() === '') return text;
+    
+    const regex = new RegExp(`(${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    return text.replace(regex, '<mark style="background-color: #ffeb3b; padding: 0 2px;">$1</mark>');
+}
+
+{% comment %} 页面加载完成后高亮关键词 {% endcomment %}
+document.addEventListener('DOMContentLoaded', function() {
+    updateSearchFieldsInResults();
+    
+    const keyword = '{{ query|escapejs }}';
+    if (keyword) {
+        // 高亮歌曲表格中的内容
+        document.querySelectorAll('.table tbody tr').forEach(row => {
+            const titleCell = row.querySelector('td:nth-child(2) a');
+            const artistCell = row.querySelector('td:nth-child(3)');
+            
+            if (titleCell) {
+                titleCell.innerHTML = highlightKeyword(titleCell.textContent, keyword);
+            }
+            if (artistCell) {
+                const artistLink = artistCell.querySelector('a');
+                if (artistLink) {
+                    artistLink.innerHTML = highlightKeyword(artistLink.textContent, keyword);
+                } else {
+                    artistCell.innerHTML = highlightKeyword(artistCell.textContent, keyword);
+                }
+            }
+        });
+        
+        // 高亮歌手表格中的内容
+        document.querySelectorAll('.table tbody tr').forEach(row => {
+            const nameCell = row.querySelector('td:nth-child(2) a');
+            const abstractCell = row.querySelector('td:nth-child(3)');
+            
+            if (nameCell) {
+                nameCell.innerHTML = highlightKeyword(nameCell.textContent, keyword);
+            }
+            if (abstractCell && !abstractCell.querySelector('span[style*="italic"]')) {
+                abstractCell.innerHTML = highlightKeyword(abstractCell.textContent, keyword);
+            }
+        });
+    }
+});
+
 {% comment %} 更改搜索类别时重置字段 {% endcomment %}
 function updateSearchFieldsInResults() {
     const searchType = document.querySelector('input[name="type"]:checked').value;
